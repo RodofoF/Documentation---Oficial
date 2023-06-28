@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
+    <link href="https://unpkg.com/video.js@7/dist/video-js.min.css" rel="stylesheet" />
+    <link href="https://unpkg.com/@videojs/themes@1/dist/city/index.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon">
+    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+    <!-- <link rel="stylesheet" href="./style.css"> -->
+    <style>
+        body {
+            background-color: black;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+    </style>
+    <title>SpeedCast - Monitor</title>
+</head>
+
+<body>
+    <section class="monitor">
+        <div class="monitor__box">
+            <video id="video" width="320" height="240" autoplay class="video-js">
+                <source src="http://10.0.19.84:8090/hls/teste.m3u8" type="application/x-mpegURL">
+            </video>
+        </div>
+    </section>
+</body>
+<script>
+        var video = videojs('video', {
+            controls: true,
+            autoplay: true,
+            muted: true,
+            preload: 'auto'
+        });
+</script>
+</html>
