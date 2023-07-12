@@ -13,7 +13,7 @@ Os arquivos desse procedimento já foram editados para facilitar a configuraçã
 ## Depêndencias
 
 * $ sudo apt update
-* $ sudo apt install nginx && ffmpeg
+* $ sudo apt install nginx -y && apt install ffmpeg -y
 
 ## NodeJs
 Instalação via repositório oficial do NodeJs, necessário para instalar o PM2 (Gerenciador de processos) que será necessário para gerenciar o script ffmpeg.
@@ -32,6 +32,20 @@ Para que todos pacotes node funcione adequadamente, será necessário instalar o
 
 * sudo apt install build-essential
 
+Instale o pm2 com
+* npm install -g pm2
+
+## GitHub
+Verifique a versão do git, quase necessite instale o git 
+* git --version
+
+Faça um clone do repositório
+* git clone https://github.com/RodofoF/Documentation---Oficial.git
+
+Habilite o script
+* cd Documentation---Oficial
+* chmod +x speedcast.sh
+
 ### Ajuste o firewall
 Para visualizar as app liberadas em seu firewall
 * $ sudo ufw app list
@@ -41,7 +55,8 @@ Caso necessite ativar o firewall
 
 Caso necessite liberar algum tráfico, nesse exemplo estamos liberando o tráfico Nginx HTTPS que é referente a porta 443. Caso necessite receber o video rtmp de alguma fonte externa considere liberar a porta 1935 referente ao protocolo rtmp.
 
-* $ sudo allow 'Nginx HTTPS'
+* $ sudo ufw allow 'Nginx HTTPS'
+* $ sudo ufw allow 'Nginx HTTP'
 
 ### Verificação
 Para verificar se o servidor foi instalado corretamente
@@ -67,6 +82,19 @@ Após criar o arquivo cria uma conexão com sites-enable
 Crie para armazenar os aquivos de stream, uma pasta com o comando:
 * $ sudo mkdir /var/www/html/stream
 
+## Certificado SSL - autoassinado
+
+Para teste iremos gerar um certificado autoassinado para teste
+* openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
+
+Verifique se existe alguma falha
+* nginx -t
+
+Se você seguiu os passos anteriores a posição da chave já esta no módulo correto. Após isso reinicie seu servidor
+
+É possivel verificar em:
+* https://{seu_dominio}/hls/{chave}.m3u8
+
 ### Atualizando 
 
 Após a atualização dos arquivos execute um reload e restart no servidor.
@@ -75,17 +103,13 @@ Após a atualização dos arquivos execute um reload e restart no servidor.
 * $ sudo systemctl reload nginx.service
 
 
-## Certificado SSL - autoassinado
-
-Para teste iremos gerar um certificado autoassinado para teste
-* openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
-
-Se você seguiu os passos anteriores a posição da chave já esta no módulo correto. Após isso reinicie seu servidor
-
-É possivel verificar em:
-* https://{seu_dominio}/hls/{chave}.m3u8
-
 ## FFmpeg
+
+Para teste o script speedcast.sh está criado, direcionando um video para localhost. 
+Execute o comando para dar previlégios ao script.
+
+Após o privilégio execute o script com auxilio do pm2
+pm2 start speedcast.sh
 
 Para testar o servidor é necessário utilizar um software de stream como OBS ou utilizar ffmpeg diretamente no server. Para instalar:
 
