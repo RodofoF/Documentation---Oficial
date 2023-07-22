@@ -14,6 +14,7 @@ Os arquivos desse procedimento já foram editados para facilitar a configuraçã
 
 * $ sudo apt update
 * $ sudo apt install nginx -y && apt install ffmpeg -y
+* $ sudo apt install libnginx-mod-rtmp
 
 ## NodeJs
 Instalação via repositório oficial do NodeJs, necessário para instalar o PM2 (Gerenciador de processos) que será necessário para gerenciar o script ffmpeg.
@@ -21,7 +22,7 @@ Instalação via repositório oficial do NodeJs, necessário para instalar o PM2
 * cd ~
 * curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
 * sudo bash nodesource_setup.sh
-* sudo apt install nodejs
+* sudo apt install nodejs -y
 
 Verifique a versão
 
@@ -30,7 +31,7 @@ Verifique a versão
 
 Para que todos pacotes node funcione adequadamente, será necessário instalar o pacote build-essential.
 
-* sudo apt install build-essential
+* sudo apt install build-essential -y
 
 Instale o pm2 com
 * npm install -g pm2
@@ -42,11 +43,20 @@ Verifique a versão do git, quase necessite instale o git
 Faça um clone do repositório
 * git clone https://github.com/RodofoF/Documentation---Oficial.git
 
-Habilite o script
+Habilite o script e execute juntamente com PM2. Para gerar o o video de teste
 * cd Documentation---Oficial
 * chmod +x speedcast.sh
+* pm2 start speedcast.sh
+
+O resultado deve ser como na imagem abaixo
+![PM2](pm2_start.png)
 
 ### Ajuste o firewall
+Para teste é aconselhavel desabilitar o firewall, no momento de produção não esqueça de habilitar e adicionar as regras necessárias.
+* $ sudo disable ufw
+
+**Caso tenha desativado o firewall pule para o passo seguinte**
+
 Para visualizar as app liberadas em seu firewall
 * $ sudo ufw app list
 
@@ -66,9 +76,10 @@ Digite o ip do seu no browser, deve aparecer uma imagem como abaixo
 
 ![welcome Nginx](welcome.png)
 
-## Modulo RTMP/HLS
-* $ sudo apt update 
-* $ sudo apt install libnginx-mod-rtmp
+
+### Pasta para stream
+Crie para armazenar os aquivos de stream, uma pasta com o comando:
+* $ sudo mkdir /var/www/html/stream
 
 ### Arquivo nginx.conf
 O arquivo se encontra em **/etc/nginx/nginx.conf** exclua o arquivo padrão e crie um novo com as informações do **nginx.conf** nesse diretório.
@@ -78,9 +89,6 @@ Crie um arquivo rtmp em **/etc/nginx/sites-available/rtmp** e copie as mesmas in
 Após criar o arquivo cria uma conexão com sites-enable
 * ln -s /etc/nginx/sites-available/rtmp /etc/nginx/sites-enabled/rtmp
 
-### Pasta para stream
-Crie para armazenar os aquivos de stream, uma pasta com o comando:
-* $ sudo mkdir /var/www/html/stream
 
 ## Certificado SSL - autoassinado
 
@@ -90,47 +98,49 @@ Para teste iremos gerar um certificado autoassinado para teste
 Verifique se existe alguma falha
 * nginx -t
 
-Se você seguiu os passos anteriores a posição da chave já esta no módulo correto. Após isso reinicie seu servidor
-
-É possivel verificar em:
-* https://{seu_dominio}/hls/{chave}.m3u8
-
-### Atualizando 
-
-Após a atualização dos arquivos execute um reload e restart no servidor.
-
+Reinicie o servidor
+* $ sudo systemctl enable nginx.service
 * $ sudo systemctl restart nginx.service
 * $ sudo systemctl reload nginx.service
 
 
-## FFmpeg
-
-Para teste o script speedcast.sh está criado, direcionando um video para localhost. 
-Execute o comando para dar previlégios ao script.
-
-Após o privilégio execute o script com auxilio do pm2
-pm2 start speedcast.sh
-
-Para testar o servidor é necessário utilizar um software de stream como OBS ou utilizar ffmpeg diretamente no server. Para instalar:
-
-
-O arquivo .mp4 está diponivel no diretório para auxiliar no teste.
-* $ ffmpeg -stream_loop -1 -re -i speedcast.mp4 -c:v libx264 -c:a aac -f flv rtmp://127.0.0.1:1935/live/teste?pkt_size=1316
-
 ## Teste
 
-Reinicie o servidor, se todos passos foram seguidos corretamentes nesse momento você deve ter um stream HLS/HTTPS
+A partir desse momento é possivel visualizar o video hls, se todos passos foram seguidos conforme o procedimento nesse momento você deve ter um stream HLS/HTTPS
 
-* https://{seu_dominio_ou_IP}/hls/{stream_key}.m3u8
+* https://{seu_IP}/hls/speedcast.m3u8
 
 
 ## Usuário e senha
 
 Para configurar usuário e senha do stream iremos utilizar a ferramenta **htpasswd** caso seja necessário instale ela no servidor.
 
+* sudo apt install apache2-utils
 * sudo htpasswd -c /etc/nginx/.htpasswd {insira_seu_usuário} 
 
-Após executar o comando acima você irá inserir a senha para o usuário, caso deseje inserir mais usuários repita o comando.
+No arquivo **/etc/nginx/sites-available/rtmp** descomente as linhas de autentificação, deixando o campo **location** como abaixo:
+
+"
+   location / {
+        add_header Access-Control-Allow-Origin *;
+        root /var/www/html/stream;
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+    }
+"
+
+
+Após executar o comando acima você irá inserir a senha para o usuário, caso deseje inserir mais usuários repita o comando abaixo novamente
+
+* sudo htpasswd -c /etc/nginx/.htpasswd {insira_novo_usuario} 
+
+## Observação
+
+Com os passos que seguimos nesse momento estamos gerando um streaming HLS com certificado SSL, porém não é um certificado valido, sendo assim é possivel aparecer erros constantes em relação a isso.
+
+O passo a seguir instrui a obter um certificado válido, porém é necessário ter um dominio ou sub-dominio.
+
+O certificado está relacionado ao arquivo **/etc/nginx/sites-available/rtmp**, neste arquivo existe  o campo server name que deve ser o mesmo nome do seu dominio.
 
 
 
