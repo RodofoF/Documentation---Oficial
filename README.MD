@@ -161,4 +161,18 @@ Caso tenha seguido o passo **Certificado SSL - autoassinado** o Certbot irá sub
 Os certificados Let's Encrypt são válidos por 90 dias, mas o Certbot configura a renovação automática por padrão. Para testar se a renovação está funcionando corretamente, você pode executar:
 * $ sudo certbot renew --dry-run
 
+## Referências
+
+How to secure Nginx with Let's Encrypt on Ubuntu 20.04
+* https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-20-04
+
+How to Install Nginx on Ubuntu 20.04
+* https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-20-04
+
+How to Set up a Video Streaming Server using-RTMP on Ubuntu 20.04
+* https://www.digitalocean.com/community/tutorials/how-to-set-up-a-video-streaming-server-using-nginx-rtmp-on-ubuntu-20-04
+
+
+
+
 
